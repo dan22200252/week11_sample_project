@@ -37,11 +37,22 @@ public class PostController {
         return "posts/form";
     }
 
+
     @PostMapping("/posts")
-    public String create(@Valid @ModelAttribute("postForm") PostForm form, BindingResult errors,
-                         @RequestParam(name = "files", required = false) List<MultipartFile> files) {
+    public String create(
+            // @ModelAttribute: 일반 Form 데이터를 DTO에 바인딩합니다.
+            @Valid @ModelAttribute("postForm") PostForm form,
+            BindingResult errors,
+            // @RequestParam(name = "files": 여러 첨부파일 수신합니다.
+            @RequestParam(name = "files", required = false) List<MultipartFile> files) {
+
+        // 입력 검증 결과를 확인합니다. 오류가 있으면 저장을 건너뛰고 작성 화면으로 돌아갑니다.
         if (errors.hasErrors()) return "posts/form";
+
+        // 게시글 및 첨부파일을 저장합니다. 첨부파일이 없을 때 빈 목록을 넘깁니다.
         Long id = posts.create(form, files == null ? List.of() : files);
+
+        //저장을 마친 후 상세 페이지로 이동합니다.
         return "redirect:/posts/" + id;
     }
 
