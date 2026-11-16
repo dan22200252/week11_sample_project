@@ -17,7 +17,12 @@
 
 # 2. Installation
 * ## 환경 설정
+  * Java 17과 MariaDB를 사용합니다.
+  * DB_URL, DB_USERNAME, DB_PASSWORD는 로컬 시스템 변수와 Render의 Environment Variables에 설정했습니다.
+
 * ## 실행 방법
+  * 로컬 실행: IntelliJ에서 AttachmentBoardApplication 실행 후 http://localhost:8080/posts 로 접속합니다.
+  * Render에서 접속: https://week11-sample-project-jq8w.onrender.com/posts
 
 ---
 
@@ -94,28 +99,79 @@
     - 관련 메서드: store()
     ```
 
-* ## Line-by-Line Code Comments
-  * PostController: 게시글 작성 및 파일 업로드 요청 처리 
-  * FileStorageService.store(): 파일 검증, 저장 경로 생성 및 실제 파일 저장 
-  * AttachmentController.download(): 파일 조회 및 HTTP 다운로드 응답 처리
-
-위  3개 메서드의 핵심 코드에 직접 설명 주석을 작성합니다.
-
 ---
 
-# 4. Customizing: 수정 내용 3가지 및 변경 전/후 결과
+# 4. Customizing
+## Text
+### Customizing 전
+![img.png](results/05_beforeCustomizingText.png)
+### Customizing 후
+![img.png](results/07_afterCustomizingText.png)
+
+## Style
+### Customizing 전
+![img.png](results/05_beforeCustomizingText.png)
+### Customizing 후
+![img.png](results/08_afterCustomizingStyle.png)
+
+## UI/Data
+### Customizing 전
+![img.png](results/06_beforeCustomizingUIData.png)
+### Customizing 후
+![img.png](results/09_afterCustomizingUIData.png)
 
 ---
 
 # 5. New Feature: 이미지 미리보기 구현 내용
+## 게시글 상세 화면에서 첨부 이미지(jpg, jpeg, png, gif) 표시
+![img.png](results/04_preview.png)
 
----
+## 이미지가 아닌 파일(PDF 등)은 기존 다운로드 기능 유지
+![img.png](results/10_noImagePreview.png)
 
-# 6. Testing & Deployment: results/ 스크린샷 4장 이상 및 Render 배포 URL
+## 존재하지 않는 파일 또는 잘못된 파일 ID에 대한 오류 처리
+* 존재하지 않는 첨부파일 ID
+![img.png](results/04_1_previewE1.png)
+* 숫자가 아닌 ID
+![img_1.png](results/04_2_previewE2.png)
+* PDF를 미리보기로 직접 요청
+![img_2.png](results/04_3_previewE3.png)
 
 ---
 
 # 7. Weekly Review:
 * ## 새롭게 배운 내용 3가지
+  * 글과 첨부파일을 하나의 요청으로 보내는 방법
+    ```text
+    게시글 작성 폼에서 multipart/form-data를 사용하면 제목, 본문, 첨부파일을 한 번에 전송할 수 있다는 것을 배웠습니다. 서버는 제목과 본문은 PostForm으로 받고 첨부파일은 List<MultipartFile>로 받습니다.
+    ```
+  * 다운로드와 이미지 미리보기의 응답 차이
+    ```text
+    같은 파일이더라도 HTTP 응답을 어떻게 구성하느냐에 따라서 브라우저에서는 다르게 처리된다는 것을 배웠습니다. 다운로드는 Content-Disposition을 attachment로 설정하고 미리보기는 이미지의 Content-Type과 inline을 지정하여서 상세 화면에 표시합니다.
+    ```
+  * DB의 첨부 정보와 서버의 실제 파일은 따로 저장된다는 점
+    ```text
+    Render에서 파일명과 유형이 표시되는데 미리보기는 404 오류가 뜨는 상황을 겪었습니다. 이를 통해서 파일명과 크기와 같은 정보가 데이터베이스에 남아있더라도 서버의 저장 폴더에서 실제 파일을 찾을 수 없다면 미리보기가 실패할 수 있다는 사실을 배웠습니다.
+    ```
+
 * ## 어려웠던 점과 해결 방법
+  * 어려웠던 점
+  
+    강의자료에 나와있는 이미지 미리보기 html `<img>` 코드를 상세 화면의 어디에 넣어야 하는지, 그 이미지 요청을 Java 코드에서 어떻게 받는지 헷갈리는 경험을 했습니다.
+  
+  * 해결 방법
+
+    AI와 함께 detail.html의 구조를 살펴보고, 각 첨부파일의 ID를 사용할 수 있도록 `<img>`를 첨부파일 반복문 안에 넣어 해결했습니다.
+    
 * ## AI 활용 내용 및 느낀 점
+  * AI 활용 내용
+    ```text
+    이미지 미리보기 기능을 구현하는 과정에서 컨트롤러 내 veiw() 메서드를 추가로 작성하는 과정에서 도움을 받았습니다. 
+    또한 기존 강의 자료 내에 있는 교수님의 예시 코드를 함께 분석하고 개념을 확립하는 데에도 도움을 받았습니다.
+    작성이 완료된 코드 내 오류가 있는지 함께 검토하는 데에도 도움을 받았습니다.
+    ```
+  * 느낀 점
+    ```text
+    처음에는 <img> 코드를 어디에 넣는지 헷갈렸지만 반복문 안에서 각 첨부파일의 ID를 사용할 수 있고 브라우저가 그 ID로 서버에 이미지를 요청한다는 흐름을 이해할 수 있었습니다.
+    AI를 학습 도구로 어떻게 사용하면 더 효율적이고 자기 성장에 도움이 될지 긍정적인 방향으로 잘 활용해 보고 싶습니다.
+    ```
